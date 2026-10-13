@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교통약자 이동지원 서비스 기획서</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #5d6470;
+    --border: #e2e2dd;
+    --accent: #2f6fde;
+    --accent-soft: #eaf1fd;
+    --safe: #1f8a4c;
+    --caution: #b7791f;
+    --danger: #c53030;
+    --code-bg: #f1f1ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16181c;
+      --surface: #1e2126;
+      --text: #e6e8eb;
+      --muted: #a0a6b0;
+      --border: #30343b;
+      --accent: #6ea0ff;
+      --accent-soft: #1f2a3d;
+      --safe: #4cc38a;
+      --caution: #e0a948;
+      --danger: #f07171;
+      --code-bg: #262a30;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181c;
+    --surface: #1e2126;
+    --text: #e6e8eb;
+    --muted: #a0a6b0;
+    --border: #30343b;
+    --accent: #6ea0ff;
+    --accent-soft: #1f2a3d;
+    --safe: #4cc38a;
+    --caution: #e0a948;
+    --danger: #f07171;
+    --code-bg: #262a30;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 40px 16px 80px; }
+  header { margin-bottom: 32px; }
+  header h1 { font-size: 1.9rem; margin: 0 0 8px; line-height: 1.3; }
+  header p { color: var(--muted); margin: 0; }
+  nav.toc {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 32px;
+  }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px 24px; margin-bottom: 24px;
+  }
+  section > h2 {
+    margin: 0 0 16px; font-size: 1.4rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 1rem; flex-shrink: 0;
+  }
+  h3 { font-size: 1.1rem; margin: 28px 0 10px; }
+  h3:first-of-type { margin-top: 8px; }
+  p { margin: 8px 0; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); font-weight: 600; white-space: nowrap; }
+  pre {
+    background: var(--code-bg); border-radius: 8px; padding: 14px 16px;
+    overflow-x: auto; font-size: 0.88rem; line-height: 1.55; margin: 12px 0;
+  }
+  code { font-family: "D2Coding", Consolas, "Courier New", monospace; }
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--accent-soft);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0;
+  }
+  .callout.warn { border-left-color: var(--caution); }
+  .badge {
+    display: inline-block; padding: 1px 8px; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 600; border: 1px solid currentColor; white-space: nowrap;
+  }
+  .safe { color: var(--safe); }
+  .caution { color: var(--caution); }
+  .danger { color: var(--danger); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0; }
+  .card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card h4 { margin: 0 0 6px; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
+  a { color: var(--accent); }
+  footer { color: var(--muted); font-size: 0.88rem; text-align: center; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>교통약자 이동지원 서비스 기획서</h1>
+  <p>실시간 CCTV, 지형 높이 데이터(DEM), 도로 선 데이터를 결합해 교통약자에게 "지금 가기 편한 길"을 안내하는 서비스</p>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <ol>
+    <li><a href="#s1">어떤 서비스를 만들고 싶은지?</a></li>
+    <li><a href="#s2">서비스를 만들려면 어떤 데이터가 필요한지?</a></li>
+    <li><a href="#s3">입력값과 출력값이 무엇인가?</a></li>
+    <li><a href="#s4">타겟층</a></li>
+    <li><a href="#s5">그 외 (현실적 제약, 개인정보, 개발 단계, 서비스 확장)</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="s1">
+  <h2><span class="num">1</span>어떤 서비스를 만들고 싶은지?</h2>
+  <p><strong>교통약자(유모차·휠체어 사용자, 고령자, 장애인 등)를 위한 안전 경로 안내 서비스</strong>입니다.</p>
+  <p>두 종류의 정보를 결합해 경로의 위험도를 판단합니다.</p>
+  <div class="grid">
+    <div class="card">
+      <h4>⛰️ 원래 가기 힘든 길 (고정 정보)</h4>
+      <p>DEM과 도로 선 데이터로 도로 구간별 <strong>경사도</strong>를 미리 계산</p>
+    </div>
+    <div class="card">
+      <h4>🚗 지금 가기 힘든 길 (실시간 정보)</h4>
+      <p>CCTV 영상에서 <strong>갓길 주차 차량</strong>을 인식해 <strong>남은 통행 폭</strong>을 계산</p>
+    </div>
+  </div>
+
+  <h3>핵심 기능</h3>
+  <ol>
+    <li><strong>도로 경사도 계산</strong>: 경사도(%) = 높이 차이 ÷ 수평 거리 × 100</li>
+    <li><strong>갓길·골목 주차 차량 인식</strong>: 영상에서 차량과 도로 영역을 인식하고, 일정 시간 이상 멈춰 있는 차량을 "주차"로 판단</li>
+    <li><strong>위험도 측정</strong>: 도로 폭 대비 주차 차량이 차지한 폭으로 <strong>남은 통행 폭</strong>을 계산하고 경사도와 합쳐 위험도 산출</li>
+    <li><strong>맞춤 경로 추천</strong>: 사용자 이동 유형에 맞춰 경사, 통행 폭, 장애물을 고려한 "편한 길"과 대안 경로 제시</li>
+  </ol>
+
+  <h3>위험도 계산 예시</h3>
+  <pre><code>남은 통행 폭 = 도로 폭 − 주차 차량이 차지한 폭
+
+남은 폭 ≥ 2.0m   → 🟢 안전
+1.2 ~ 2.0m      → 🟡 주의 (휠체어 통과 가능, 차와 마주치면 위험)
+&lt; 1.2m          → 🔴 위험 (휠체어·유모차 통과 어려움)
+
++ 경사도를 가중치로 반영 → "좁고 가파른 길 = 매우 위험"</code></pre>
+  <p>면적 비율보다 <strong>남은 통행 폭</strong>을 기준으로 하는 이유는 교통약자에게 중요한 것이 "도로의 몇 %가 막혔나"가 아니라 "휠체어가 지나갈 폭이 남아 있나"이기 때문입니다.</p>
+
+  <h3>서비스 구조</h3>
+  <pre><code>[DEM + 도로 선 데이터] → 도로 구간별 경사도 (미리 한 번 계산)
+[실시간 CCTV / 제보 사진] → AI 분석 → 구간별 주차 차량·남은 통행 폭 (몇 분마다 갱신)
+[공공 API]              → 엘리베이터·저상버스·날씨·편의시설 등
+          ↓
+   사용자 이동 유형에 맞춘 위험도 계산
+          ↓
+   경로 추천 + 위험 구간 경고 + 대안 경로</code></pre>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2><span class="num">2</span>서비스를 만들려면 어떤 데이터가 필요한지?</h2>
+
+  <h3>① 경사도 계산용: 지형 높이 데이터 (DEM)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>출처</th><th>내용</th><th>비고</th></tr>
+    <tr><td>국토지리정보원 (국토정보플랫폼, map.ngii.go.kr)</td><td>한국 5m 간격 수치표고모델</td><td>가장 정확한 무료 데이터</td></tr>
+    <tr><td>V-World (vworld.kr)</td><td>국토교통부 공간정보 오픈 플랫폼, 높이 정보와 API</td><td>API 활용 가능</td></tr>
+    <tr><td>SRTM / Copernicus DEM</td><td>전 세계 30m 간격 무료 DEM</td><td>도심 골목길에는 해상도가 부족</td></tr>
+  </table></div>
+
+  <h3>② 경사도 계산용: 도로 선 데이터</h3>
+  <div class="table-wrap"><table>
+    <tr><th>출처</th><th>내용</th><th>비고</th></tr>
+    <tr><td>OpenStreetMap</td><td>전 세계 도로·보행로 네트워크</td><td>Python <code>osmnx</code>로 바로 다운로드, 경사도 계산 기능 내장</td></tr>
+    <tr><td>도로명주소 전자지도 (juso.go.kr)</td><td>도로 구간 shapefile</td><td>도로 폭 정보 포함 여부 확인 필요</td></tr>
+  </table></div>
+  <pre><code>import osmnx as ox
+G = ox.graph_from_place("서울특별시 관악구", network_type="walk")
+G = ox.elevation.add_node_elevations_raster(G, "dem.tif")  # 다운받은 DEM 파일
+G = ox.elevation.add_edge_grades(G)  # 도로 구간마다 경사도 자동 계산</code></pre>
+
+  <h3>③ 실시간 CCTV 영상</h3>
+  <div class="table-wrap"><table>
+    <tr><th>출처</th><th>내용</th><th>한계</th></tr>
+    <tr><td>국가교통정보센터 (its.go.kr)</td><td>고속도로, 국도, 도시 주요 간선도로 CCTV 실시간 영상 주소 (Open API)</td><td>골목길·이면도로는 거의 없음, 화질이 낮고 차도를 멀리서 넓게 찍음</td></tr>
+    <tr><td>서울시 TOPIS</td><td>서울 교통 CCTV</td><td>큰 도로 위주</td></tr>
+    <tr><td>지자체 통합관제센터 (방범 CCTV)</td><td>골목길 CCTV</td><td>개인정보 문제로 비공개, 협력이 필요함</td></tr>
+  </table></div>
+
+  <h3>④ 공공데이터 (Open API / CSV)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>출처</th><th>활용할 데이터</th></tr>
+    <tr><td>공공데이터포털 (data.go.kr)</td><td>
+      <ul>
+        <li>지하철역 엘리베이터·리프트 위치와 운행 상태</li>
+        <li>저상버스 실시간 위치·도착 정보</li>
+        <li>교통약자 이동지원센터(장애인 콜택시) 정보</li>
+        <li>음향신호기·점자블록 위치</li>
+        <li>장애인 화장실, 쉼터, 벤치 위치</li>
+        <li>기상(기상청), 대기오염, 결빙 취약 구간, 급경사지 현황(행정안전부)</li>
+        <li>전국 CCTV 설치 위치</li>
+      </ul>
+    </td></tr>
+    <tr><td>서울 열린데이터광장 (data.seoul.go.kr)</td><td>
+      <ul>
+        <li>장소별 실시간 인구 혼잡도</li>
+        <li>CCTV 설치 위치 (영상은 없음)</li>
+        <li>지하철·버스 승하차, 대기질, 도로·보도 관련 데이터</li>
+      </ul>
+    </td></tr>
+  </table></div>
+
+  <h3>⑤ AI 모델 학습·검증용 이미지 데이터</h3>
+  <div class="table-wrap"><table>
+    <tr><th>출처</th><th>활용</th><th>라이선스 / 주의</th></tr>
+    <tr><td>AIhub (aihub.or.kr)</td><td>도로·보행 영상, 인도 보행 영상, 차량·보행자 이미지 (JSON 라벨)</td><td>이용 신청 필요, 국내에서만 사용 가능</td></tr>
+    <tr><td>Roboflow Universe</td><td>주차 차량 등 객체 탐지 데이터, YOLO/COCO 형식으로 바로 다운로드</td><td>데이터셋마다 라이선스가 다름</td></tr>
+    <tr><td>COCO (cocodataset.org)</td><td>차량·사람 박스와 분할 라벨. 대부분의 YOLO 사전학습 모델이 COCO로 학습되어 있음</td><td>상업 이용 비교적 자유로움</td></tr>
+    <tr><td>Open Images (Google)</td><td>900만 장, 600개 클래스 박스 라벨</td><td>CC BY (출처 표기 필요)</td></tr>
+    <tr><td>CrowdHuman</td><td>사람이 많은 장면에서 사람 탐지 성능 검증</td><td class="danger">비상업용만 허용</td></tr>
+    <tr><td>Kaggle / Hugging Face</td><td>추가 데이터셋과 사전학습 모델</td><td>데이터셋마다 라이선스 확인</td></tr>
+  </table></div>
+
+  <h3>⑥ 사용하는 AI 기술 (Vision AI)</h3>
+  <p>이 서비스의 영상 분석은 모두 <strong>Vision AI(컴퓨터 비전)</strong> 기술입니다.</p>
+  <p><strong>측정용 Vision AI: 정확한 수치 계산 담당</strong></p>
+  <ul>
+    <li><strong>세그멘테이션 (YOLO-seg 등)</strong>: 차량과 도로 영역을 픽셀 단위로 인식</li>
+    <li><strong>객체 추적 (ByteTrack 등)</strong>: 같은 위치에 1~2분 이상 멈춰 있는 차량을 "주차"로 판단</li>
+    <li><strong>원근 보정 (버드뷰 변환)</strong>: 카메라마다 바닥 기준점 4개를 지정해 위에서 내려다본 시점으로 바꾼 뒤 실제 크기(m)를 계산</li>
+  </ul>
+  <p><strong>이해용 Vision AI (비전-언어 모델, VLM): 상황 설명과 예외 상황 담당</strong></p>
+  <ul>
+    <li><strong>학습하지 않은 장애물 인식</strong>: 쓰러진 킥보드, 공사 자재, 쓰레기 더미, 파손된 보도블록 등</li>
+    <li><strong>상황 설명 문장 생성</strong>: "인도 오른쪽에 차량 2대가 주차되어 통행 폭이 좁습니다" → 시각장애인 음성 안내에 활용</li>
+    <li><strong>사용자 제보 사진 검증·분류</strong>: 제보 내용이 사진과 맞는지 확인하고 유형을 자동으로 분류</li>
+  </ul>
+  <div class="table-wrap"><table>
+    <tr><th>구분</th><th>측정용 (YOLO 등)</th><th>이해용 (VLM)</th></tr>
+    <tr><td>잘하는 것</td><td>정확한 위치·크기 측정, 빠른 실시간 처리</td><td>처음 보는 물체 이해, 자연어 설명</td></tr>
+    <tr><td>약한 것</td><td>학습하지 않은 물체는 인식하지 못함</td><td>m 단위 수치 측정은 부정확함, 느리고 호출 비용이 듦</td></tr>
+    <tr><td>이 서비스에서 역할</td><td>통행 폭·위험도 계산 (핵심)</td><td>쓰러진 킥보드나 공사 자재 같은 예외 장애물 감지, 시각장애인용 음성 설명, 제보 사진 검증 (보조)</td></tr>
+  </table></div>
+  <div class="callout">
+    <strong>추천 구조:</strong> 실시간 수치 계산은 YOLO 같은 측정용 모델이 맡고, VLM은 위험 구간으로 판정된 장면이나 제보 사진에만 호출해서 설명과 예외 상황을 보완합니다. 이렇게 하면 비용과 속도 부담을 줄일 수 있습니다.
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2><span class="num">3</span>입력값과 출력값이 무엇인가?</h2>
+  <p>서비스를 <strong>AI 분석 단계</strong>와 <strong>사용자 서비스 단계</strong>, 두 층으로 나눠 설계합니다.</p>
+  <pre><code>[분석]   영상·사진 + 카메라·도로 정보        → 도로 구간별 측정값
+[서비스] 사용자 요청(출발지, 목적지, 이동 유형) → 맞춤 경로 + 위험 구간 안내</code></pre>
+
+  <h3>A. AI 분석 단계: 입력값</h3>
+  <div class="table-wrap"><table>
+    <tr><th>입력</th><th>내용</th><th>출처</th><th>갱신</th></tr>
+    <tr><td>이미지 / 영상 프레임</td><td>CCTV 프레임 또는 사용자 제보 사진</td><td>국가교통정보센터, 제보, 공개 데이터셋</td><td>실시간</td></tr>
+    <tr><td>카메라 정보</td><td>카메라 ID, 위치(위도·경도), 비추는 도로 구간 ID</td><td>CCTV API</td><td>고정</td></tr>
+    <tr><td>원근 보정 기준점</td><td>화면 속 바닥 4개 지점과 실제 거리(m)</td><td>카메라마다 처음에 한 번 설정</td><td>고정</td></tr>
+    <tr><td>도로 영역</td><td>화면에서 도로가 차지하는 다각형</td><td>처음에 한 번 그리거나 AI로 인식</td><td>고정</td></tr>
+    <tr><td>도로 구간 정보</td><td>구간 ID, 도로 폭(m), 길이</td><td>도로 선 데이터</td><td>고정</td></tr>
+    <tr><td>경사도</td><td>구간별 경사도(%)</td><td>DEM으로 미리 계산</td><td>고정</td></tr>
+  </table></div>
+
+  <h3>A. AI 분석 단계: 출력값 (도로 구간마다 하나)</h3>
+  <pre><code>{
+  "segment_id": "SEG_00123",
+  "timestamp": "2026-10-13T14:30:00",
+  "source": "cctv",
+  "parked_vehicles": 3,
+  "road_width_m": 4.0,
+  "remaining_width_m": 1.1,
+  "slope_percent": 8.5,
+  "confidence": 0.87
+}</code></pre>
+  <div class="callout">
+    AI 분석은 <strong>측정값(남은 폭, 경사, 차량 수)까지만</strong> 출력하고, <strong>위험 등급은 서비스 단계에서 사용자 유형에 맞춰 계산</strong>합니다. 그래야 같은 분석 결과를 모든 사용자 유형에 다시 쓸 수 있습니다.
+  </div>
+
+  <h3>B. 사용자 서비스 단계: 입력값</h3>
+  <div class="table-wrap"><table>
+    <tr><th>입력</th><th>예시</th></tr>
+    <tr><td>출발지 / 목적지</td><td>좌표 또는 주소</td></tr>
+    <tr><td><strong>이동 유형</strong> (가장 중요)</td><td>수동 휠체어, 전동 휠체어, 유모차, 고령자(도보), 시각장애인</td></tr>
+    <tr><td>선택 옵션</td><td>최대 허용 경사, 계단 회피, 엘리베이터 경유 여부</td></tr>
+  </table></div>
+
+  <h3>B. 사용자 서비스 단계: 출력값</h3>
+  <pre><code>{
+  "route": [ /* 경로 좌표 목록 */ ],
+  "total_distance_m": 850,
+  "estimated_time_min": 14,
+  "max_slope_percent": 5.2,
+  "warnings": [
+    {
+      "segment_id": "SEG_00123",
+      "risk_score": 82,
+      "level": "danger",
+      "reasons": ["통행폭 부족", "급경사"],
+      "message": "주차 차량으로 통행폭 1.1m"
+    }
+  ],
+  "alternative_route": { /* 더 길지만 안전한 경로 */ },
+  "data_updated_at": "2026-10-13T14:30:00"
+}</code></pre>
+  <ul>
+    <li><code>risk_score</code> (0~100): 경로 계산에 사용</li>
+    <li><code>level</code>: 화면 표시용 (<span class="badge safe">safe</span> <span class="badge caution">caution</span> <span class="badge danger">danger</span>)</li>
+    <li><code>reasons</code>: 왜 위험한지 사용자에게 설명</li>
+    <li><code>data_updated_at</code>: 실시간 데이터라 몇 분 전 정보인지 표시</li>
+  </ul>
+
+  <h3>첫 프로토타입 (최소 버전)</h3>
+  <ul>
+    <li><strong>입력</strong>: 사진 1장 + 그 사진에 해당하는 도로 폭</li>
+    <li><strong>출력</strong>: 주차 차량 수, 남은 통행 폭, 위험 등급</li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2><span class="num">4</span>타겟층</h2>
+  <p><strong>유모차·휠체어 사용자, 고령자, 장애인 등 이동에 어려움이 있는 교통약자</strong></p>
+
+  <h3>사용자 유형별 기준값 (예시)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>유형</th><th>최대 허용 경사</th><th>필요한 통행 폭</th><th>특히 위험한 것</th></tr>
+    <tr><td>수동 휠체어</td><td>약 5~8%</td><td>1.2m 이상</td><td>오르막·내리막, 턱</td></tr>
+    <tr><td>전동 휠체어</td><td>약 8~10%</td><td>1.2m 이상</td><td>좁은 길, 턱</td></tr>
+    <tr><td>유모차</td><td>약 8%</td><td>0.9m 이상</td><td>턱, 울퉁불퉁한 노면</td></tr>
+    <tr><td>고령자 (도보)</td><td>약 8~10%</td><td>0.9m 이상</td><td>긴 오르막, 결빙, 쉴 곳 없는 긴 구간</td></tr>
+    <tr><td>시각장애인</td><td>경사 영향 적음</td><td>0.9m 이상</td><td><strong>갓길 주차 차량·장애물</strong></td></tr>
+  </table></div>
+  <div class="callout warn">
+    한국 장애인등편의법은 경사로 기울기를 보통 <strong>1/12(약 8.3%) 이하</strong>, 보도 유효폭을 <strong>1.2m 이상</strong>으로 정하고 있습니다. 서비스 기준을 확정하기 전에 법령 원문을 확인해야 합니다. 표의 값은 출발점이며, 사용자가 "내 최대 경사"를 직접 조절할 수 있게 합니다.
+  </div>
+
+  <h3>같은 구간, 다른 위험도</h3>
+  <pre><code>남은 폭 1.1m, 경사 6%인 구간
+  → 수동 휠체어: 🔴 위험 (폭 부족 + 경사 부담)
+  → 유모차:     🟡 주의
+  → 시각장애인: 🟡 주의 (장애물 있음 알림)</code></pre>
+
+  <h3>앱 접근성 설계</h3>
+  <ul>
+    <li><strong>큰 글씨와 버튼, 단순한 화면</strong> (고령자)</li>
+    <li><strong>스크린리더 지원, 음성 안내</strong> (시각장애인)</li>
+    <li><strong>색으로만 구분하지 않기</strong>: 🔴🟡🟢에 아이콘이나 글자를 함께 표시</li>
+    <li><strong>첫 실행 때 이동 유형을 한 번만 선택</strong>하고 이후에는 자동 적용</li>
+  </ul>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2><span class="num">5</span>그 외</h2>
+
+  <h3>현실적인 제약: 골목길 CCTV</h3>
+  <p>국가교통정보센터와 TOPIS의 공개 CCTV는 <strong>큰 도로 위주</strong>이고, 차량 교통 흐름 파악이 목적이라 갓길 주차 차량이나 인도 상태 분석에는 적합하지 않을 수 있습니다. 골목길 CCTV는 대부분 <strong>방범용</strong>이고, 개인정보보호법상 실시간 영상이 외부에 공개되지 않습니다.</p>
+  <p><strong>대안</strong></p>
+  <ol>
+    <li><strong>지자체 통합관제센터와 협력</strong>: 영상은 센터 안에서 분석하고 위험도 같은 결과값만 받기 (지자체 실증 사업, 공모전, 스마트시티 사업)</li>
+    <li><strong>직접 카메라 설치</strong>: 테스트 지역 몇 곳에 설치 (안내판 설치 등 법적 의무 준수)</li>
+    <li><strong>사용자 제보 사진 분석</strong>: 사용자가 찍어 올린 사진을 같은 AI 모델로 분석</li>
+    <li><strong>개발 단계에서는 공개 데이터셋 사용</strong>: AIhub, Roboflow 데이터로 모델을 먼저 완성</li>
+  </ol>
+  <div class="callout">
+    <strong>정리:</strong> 큰 도로는 국가교통정보센터 실시간 영상을 쓰고, 골목길은 공개 데이터셋으로 개발한 뒤 지자체 협력이나 사용자 제보로 확장합니다.
+  </div>
+
+  <h3>개인정보 보호</h3>
+  <ul>
+    <li>영상은 저장하지 않고 실시간으로 분석만 하기</li>
+    <li>결과는 "남은 폭 1.1m" 같은 숫자와 상태로만 남기기</li>
+    <li>화면에 영상을 보여줘야 한다면 얼굴·번호판 블러 처리</li>
+  </ul>
+
+  <h3>라이선스 주의</h3>
+  <ul>
+    <li>CrowdHuman, ImageNet은 <strong>비상업용</strong>이라 유료 서비스에는 사용할 수 없음</li>
+    <li>상업 서비스로 운영한다면 공공 API, COCO, 상업 이용이 허용된 Roboflow·Kaggle 데이터셋 사용</li>
+    <li>AIhub는 데이터셋마다 이용 조건이 다르므로 개별 확인 필요</li>
+  </ul>
+
+  <h3>개발 단계 (로드맵)</h3>
+  <ol>
+    <li><strong>1단계</strong>: 사진 1장에서 주차 차량 인식 → 남은 통행 폭 → 위험 등급 계산</li>
+    <li><strong>2단계</strong>: 특정 지역(예: 관악구) DEM + 도로 선 데이터로 경사도 지도 제작</li>
+    <li><strong>3단계</strong>: 사용자 이동 유형별 위험도 계산 로직 추가</li>
+    <li><strong>4단계</strong>: 경로 추천과 대안 경로 기능 추가</li>
+    <li><strong>5단계</strong>: 실시간 CCTV 연동, 엘리베이터·저상버스 등 공공 API 결합</li>
+    <li><strong>6단계</strong>: 지자체 협력, 사용자 제보 기능으로 골목길까지 확장</li>
+  </ol>
+
+  <h3>확장 아이디어</h3>
+  <div class="grid">
+    <div class="card"><h4>❄️ 겨울철 결빙 위험 지도</h4><p>경사도와 기온(기상청 API)을 결합해 미끄러운 길 경고</p></div>
+    <div class="card"><h4>🚲 따릉이 오르막 회피 경로</h4><p>서울 따릉이 데이터와 경사도 결합</p></div>
+    <div class="card"><h4>🚇 엘리베이터 고장 알림</h4><p>경로상 지하철역 엘리베이터 운행 상태를 실시간 반영</p></div>
+    <div class="card"><h4>📢 불법 주차 신고 연계</h4><p>통행을 막는 주차 차량을 사용자가 바로 신고</p></div>
+  </div>
+</section>
+
+<footer>
+  ※ 데이터 출처와 이용 조건, 법령 기준값은 작성 시점의 일반 정보를 바탕으로 정리했으며, 실제 사용 전에 각 사이트와 법령 원문에서 확인이 필요합니다.
+</footer>
+
+</div>
+</body>
+</html>
